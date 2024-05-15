@@ -2,6 +2,8 @@ package com.API.BookLens.main;
 
 import java.util.Scanner;
 
+import com.API.BookLens.service.GetAPIData;
+
 /**
  * The Main class is responsible for managing the main menu and invoking appropriate actions based on user input.
  */
@@ -57,7 +59,11 @@ public class Main {
     }
 
     private void searchBookByTitle() {
-        System.out.println("Unimplemented method 'searchBookByTittle'");
+        System.out.println("Type the book name:");
+        String book = scan.nextLine();
+        String searchInURL = book.replace(" ", "%20");
+        String json = GetAPIData.getBookData("https://gutendex.com/books/?search=" + searchInURL);
+        System.out.println(json);
     }
 
     private void listRegisteredBooks() {

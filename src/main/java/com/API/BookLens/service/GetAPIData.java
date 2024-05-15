@@ -6,8 +6,8 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
-public class GetBookInfos {
-    static public String getData(String adress) {
+public class GetAPIData {
+    static public String getBookData(String adress) {
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(adress))
