@@ -23,19 +23,17 @@ public class Author {
     @Column(unique = true)
     private String name;
 
-    private String dateOfBirth;
+    private int dateOfBirthYear;
 
-    private String dateOfDeath;
+    private int dateOfDeathYear;
 
     @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<Book> books = new ArrayList<>();
 
-    public Author(Long id, String name, String dateOfBirth, String dateOfDeath, List<Book> books) {
-        this.id = id;
+    public Author(String name, int dateOfBirthYear, int dateOfDeathYear) {
         this.name = name;
-        this.dateOfBirth = dateOfBirth;
-        this.dateOfDeath = dateOfDeath;
-        this.books = books;
+        this.dateOfBirthYear = dateOfBirthYear;
+        this.dateOfDeathYear = dateOfDeathYear;
     }
 
     public Long getId() {
@@ -54,20 +52,20 @@ public class Author {
         this.name = name;
     }
 
-    public String getDateOfBirth() {
-        return dateOfBirth;
+    public int getDateOfBirthYear() {
+        return dateOfBirthYear;
     }
 
-    public void setDateOfBirth(String dateOfBirth) {
-        this.dateOfBirth = dateOfBirth;
+    public void setDateOfBirthYear(int dateOfBirthYear) {
+        this.dateOfBirthYear = dateOfBirthYear;
     }
 
-    public String getDateOfDeath() {
-        return dateOfDeath;
+    public int getDateOfDeathYear() {
+        return dateOfDeathYear;
     }
 
-    public void setDateOfDeath(String dateOfDeath) {
-        this.dateOfDeath = dateOfDeath;
+    public void setDateOfDeathYear(int dateOfDeathYear) {
+        this.dateOfDeathYear = dateOfDeathYear;
     }
 
     public List<Book> getBooks() {
@@ -77,5 +75,25 @@ public class Author {
     public void setBooks(List<Book> books) {
         this.books = books;
     }
-    
+
+    @Override
+    public String toString() {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("-----------------------------------------\n");
+        stringBuilder.append("                  Author                 \n");
+        stringBuilder.append("Name: ").append(name).append("\n");
+        stringBuilder.append("Birth year: ").append(dateOfBirthYear).append("\n");
+        stringBuilder.append("Death year: ").append(dateOfDeathYear).append("\n");
+        stringBuilder.append("Books: [");
+        for (int i = 0; i < books.size(); i++) {
+            stringBuilder.append(books.get(i).getTitle());
+            if (i < books.size() - 1) {
+                stringBuilder.append(", ");
+            }
+        }
+        stringBuilder.append("]\n");
+        stringBuilder.append("-----------------------------------------");
+        return stringBuilder.toString();
+    }
+
 }

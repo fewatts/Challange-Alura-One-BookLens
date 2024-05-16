@@ -23,12 +23,11 @@ public class Book {
 
     private Long numberOfDownloads;
 
-    public Book(Long id, String title, Author author, String language, Long numberOfDownloads) {
-        this.id = id;
+    public Book(String title, Author author, String language, int numberOfDownloads) {
         this.title = title;
         this.author = author;
         this.language = language;
-        this.numberOfDownloads = numberOfDownloads;
+        this.numberOfDownloads = (long) numberOfDownloads;
     }
 
     public Long getId() {
@@ -69,6 +68,18 @@ public class Book {
 
     public void setNumberOfDownloads(Long numberOfDownloads) {
         this.numberOfDownloads = numberOfDownloads;
+    }
+
+    @Override
+    public String toString() {
+        String authorName = (author != null) ? author.getName() : "Unknown";
+        return "-----------------------------------------\n" +
+                "                   Book                  \n" +
+                "Title: " + title + "\n" +
+                "Author: " + authorName + "\n" +
+                "Language: " + language + "\n" +
+                "Downloads: " + numberOfDownloads + "\n" +
+                "-----------------------------------------";
     }
 
 }

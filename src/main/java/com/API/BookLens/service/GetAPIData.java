@@ -6,24 +6,32 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
+/**
+ * A utility class to retrieve data from an API endpoint.
+ */
 public class GetAPIData {
-    static public String getBookData(String adress) {
+
+    /**
+     * Retrieves JSON data from the specified API endpoint.
+     *
+     * @param address The address of the API endpoint to retrieve data from.
+     * @return A String containing the JSON data retrieved from the API endpoint.
+     * @throws RuntimeException If an error occurs during the HTTP request.
+     */
+    static public String getBookData(String address) {
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(adress))
+                .uri(URI.create(address))
                 .build();
         HttpResponse<String> response = null;
         try {
             response = client
                     .send(request, HttpResponse.BodyHandlers.ofString());
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } catch (InterruptedException e) {
+        } catch (IOException | InterruptedException e) {
             throw new RuntimeException(e);
         }
 
-        String json = response.body();
-        return json;
+        return response.body();
     }
-
+    
 }
