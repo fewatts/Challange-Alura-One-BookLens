@@ -6,8 +6,8 @@ import com.API.BookLens.dto.AuthorDTO;
 import com.API.BookLens.dto.BookDTO;
 import com.API.BookLens.model.Author;
 import com.API.BookLens.model.Book;
-// import com.API.BookLens.repository.AuthorRepository;
-// import com.API.BookLens.repository.BookRepository;
+import com.API.BookLens.repository.AuthorRepository;
+import com.API.BookLens.repository.BookRepository;
 import com.API.BookLens.service.GetAPIData;
 import com.API.BookLens.service.JsonConverter;
 
@@ -16,10 +16,15 @@ import com.API.BookLens.service.JsonConverter;
  * appropriate actions based on user input.
  */
 public class Main {
+    private final AuthorRepository authorRepository;
+    private final BookRepository bookRepository;
 
     private Scanner scan = new Scanner(System.in);
-    // private BookRepository bookRepository;
-    // private AuthorRepository authorRepository;
+
+    public Main(AuthorRepository authorRepository, BookRepository bookRepository) {
+        this.authorRepository = authorRepository;
+        this.bookRepository = bookRepository;
+    }
 
     /**
      * Displays the main menu and handles user input to perform various actions.
@@ -68,6 +73,17 @@ public class Main {
 
     }
 
+    /**
+     * Searches for a book by title.
+     * 
+     * Prompts the user to input the title of the book to search for. It then sends
+     * a request to the Gutendex API to retrieve information
+     * about the book. If a book with the given title is found, it is saved to the
+     * database. Only the first matching book is saved.
+     * 
+     * If no books are found with the given title, a message is printed indicating
+     * that no books were found.
+     */
     private void searchBookByTitle() {
         System.out.println("Type the book name:");
         String bookName = scan.nextLine();
@@ -76,26 +92,29 @@ public class Main {
         try {
             String json = GetAPIData.getBookData("https://gutendex.com/books/?search=" + bookInURL);
             BookDTO bookDTO = JsonConverter.fromJson(json, BookDTO.class);
-            int bookCount = 0; 
-            for (var result : bookDTO.results()) {
-                if (bookCount >= 3) {
-                    break;
-                }
+            boolean found = false;
 
+            for (var result : bookDTO.results()) {
                 AuthorDTO authorDTO = result.authors().get(0);
                 Author author = new Author(authorDTO.name(), authorDTO.birth_year(), authorDTO.death_year());
                 Book book = new Book(result.title(), author,
                         result.languages().isEmpty() ? "Unknown" : result.languages().get(0),
                         result.download_count());
-                // authorRepository.save(author);
-                // bookRepository.save(book);
+                authorRepository.save(author);
+                bookRepository.save(book);
                 System.out.println(book.toString());
-                bookCount++;
+                found = true;
+                break;
+            }
+
+            if (!found) {
+                System.out.println("No books found with the given title.");
             }
         } catch (Exception e) {
             System.out.println("An error occurred: " + e.getMessage());
             e.printStackTrace();
         }
+        
     }
 
     private void listRegisteredBooks() {

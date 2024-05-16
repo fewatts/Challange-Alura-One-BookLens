@@ -30,7 +30,6 @@ public class GetAPIData {
         } catch (IOException | InterruptedException e) {
             throw new RuntimeException(e);
         }
-
         return response.body();
     }
     

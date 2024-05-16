@@ -1,5 +1,6 @@
 package com.API.BookLens.model;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -7,6 +8,9 @@ import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
+/**
+ * Represents a Book entity.
+ */
 @Entity
 @Table(name = "books")
 public class Book {
@@ -14,6 +18,7 @@ public class Book {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(unique = true)
     private String title;
 
     @ManyToOne
@@ -23,6 +28,14 @@ public class Book {
 
     private Long numberOfDownloads;
 
+    /**
+     * Constructs a new Book with the given attributes.
+     *
+     * @param title             The title of the book.
+     * @param author            The author of the book.
+     * @param language          The language of the book.
+     * @param numberOfDownloads The number of downloads of the book.
+     */
     public Book(String title, Author author, String language, int numberOfDownloads) {
         this.title = title;
         this.author = author;
@@ -70,6 +83,11 @@ public class Book {
         this.numberOfDownloads = numberOfDownloads;
     }
 
+    /**
+     * Returns the string representation of the Book object.
+     *
+     * @return The string representation of the Book object.
+     */
     @Override
     public String toString() {
         String authorName = (author != null) ? author.getName() : "Unknown";

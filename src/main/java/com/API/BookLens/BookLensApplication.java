@@ -1,13 +1,20 @@
 package com.API.BookLens;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import com.API.BookLens.main.Main;
+import com.API.BookLens.repository.AuthorRepository;
+import com.API.BookLens.repository.BookRepository;
 
 @SpringBootApplication
 public class BookLensApplication implements CommandLineRunner {
+	@Autowired
+	private AuthorRepository authorRepository;
+	@Autowired
+	private BookRepository bookRepository;
 
 	/**
 	 * The main method to start the BookLens application.
@@ -27,7 +34,7 @@ public class BookLensApplication implements CommandLineRunner {
 	 */
 	@Override
 	public void run(String... args) throws Exception {
-		Main main = new Main();
+		Main main = new Main(authorRepository, bookRepository);
 		main.menu();
 	}
 

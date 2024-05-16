@@ -13,6 +13,9 @@ import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
+/**
+ * Represents an Author entity.
+ */
 @Entity
 @Table(name = "authors")
 public class Author {
@@ -30,6 +33,13 @@ public class Author {
     @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<Book> books = new ArrayList<>();
 
+    /**
+     * Constructs a new Author with the given attributes.
+     *
+     * @param name            The name of the author.
+     * @param dateOfBirthYear The birth year of the author.
+     * @param dateOfDeathYear The death year of the author.
+     */
     public Author(String name, int dateOfBirthYear, int dateOfDeathYear) {
         this.name = name;
         this.dateOfBirthYear = dateOfBirthYear;
@@ -76,6 +86,11 @@ public class Author {
         this.books = books;
     }
 
+    /**
+     * Returns the string representation of the Author object.
+     *
+     * @return The string representation of the Author object.
+     */
     @Override
     public String toString() {
         StringBuilder stringBuilder = new StringBuilder();
