@@ -33,6 +33,9 @@ public class Author {
     @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<Book> books = new ArrayList<>();
 
+    public Author() {
+    }
+
     /**
      * Constructs a new Author with the given attributes.
      *

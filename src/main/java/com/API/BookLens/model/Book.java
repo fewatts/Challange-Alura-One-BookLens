@@ -28,6 +28,10 @@ public class Book {
 
     private Long numberOfDownloads;
 
+    public Book(){
+        
+    }
+
     /**
      * Constructs a new Book with the given attributes.
      *
@@ -90,11 +94,10 @@ public class Book {
      */
     @Override
     public String toString() {
-        String authorName = (author != null) ? author.getName() : "Unknown";
         return "-----------------------------------------\n" +
                 "                   Book                  \n" +
                 "Title: " + title + "\n" +
-                "Author: " + authorName + "\n" +
+                "Author: " + author.getName() + "\n" +
                 "Language: " + language + "\n" +
                 "Downloads: " + numberOfDownloads + "\n" +
                 "-----------------------------------------";
