@@ -1,5 +1,6 @@
 package com.API.BookLens.main;
 
+import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Scanner;
 import java.util.stream.Collectors;
@@ -34,7 +35,7 @@ public class Main {
     public void menu() {
 
         while (true) {
-            int option = -1;
+            int option = 0;
 
             System.out.println("""
                     -----------------------------------------
@@ -44,26 +45,27 @@ public class Main {
                         3- List registered authors
                         4- List alive authors of certain year
                         5- List books with a certain language
-                        0- Close application
+                        6- Close application
                     -----------------------------------------
                     """);
 
             try {
-                option = Integer.parseInt(scan.nextLine());
-            } catch (NumberFormatException error) {
+                option = scan.nextInt();
+            } catch (NumberFormatException | InputMismatchException error) {
                 System.out.println("Only numbers are allowed in this menu!");
                 System.out.println(error);
                 System.out.println("-----------------------------------------");
+                scan.next();
+                continue; 
             }
 
             switch (option) {
-
                 case 1 -> searchBookByTitle();
                 case 2 -> listRegisteredBooks();
                 case 3 -> listRegisteredAuthors();
                 case 4 -> listAliveAuthorsOfCertainYear();
                 case 5 -> listBooksWithACertainLanguage();
-                case 0 -> {
+                case 6 -> {
                     System.out.println("Closing application...");
                     return;
                 }
@@ -99,9 +101,10 @@ public class Main {
             for (var result : bookDTO.results()) {
 
                 AuthorDTO authorDTO = result.authors().get(0);
+                int birthYear = authorDTO.birth_year() != null ? authorDTO.birth_year() : 0;
                 int deathYear = authorDTO.death_year() != null ? authorDTO.death_year() : 0;
 
-                Author author = new Author(authorDTO.name(), authorDTO.birth_year(), deathYear);
+                Author author = new Author(authorDTO.name(), birthYear, deathYear);
                 Book book = new Book(result.title(), author, result.languages().get(0), result.download_count());
                 Book existingBook = bookRepository.findByTitle(book.getTitle());
 
@@ -194,7 +197,7 @@ public class Main {
      * so.
      */
     private void listBooksWithACertainLanguage() {
-        int option = 0;
+        int languageOption = 0;
         System.out.println("""
                 -----------------------------------------
                     Choose the language:
@@ -205,14 +208,14 @@ public class Main {
                 -----------------------------------------
                     """);
         try {
-            option = Integer.parseInt(scan.nextLine());
+            languageOption = Integer.parseInt(scan.nextLine());
         } catch (NumberFormatException error) {
             System.out.println("Only numbers are allowed in this menu!");
             System.out.println(error);
             System.out.println("-----------------------------------------");
         }
         final String language;
-        switch (option) {
+        switch (languageOption) {
             case 1 -> language = "en";
             case 2 -> language = "pt";
             case 3 -> language = "fr";

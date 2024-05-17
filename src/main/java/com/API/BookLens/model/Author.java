@@ -100,8 +100,8 @@ public class Author {
         stringBuilder.append("-----------------------------------------\n");
         stringBuilder.append("                  Author                 \n");
         stringBuilder.append("Name: ").append(name).append("\n");
-        stringBuilder.append("Birth year: ").append(dateOfBirthYear).append("\n");
-        stringBuilder.append("Death year: ").append(dateOfDeathYear).append("\n");
+        stringBuilder.append("Birth year: ").append(dateOfBirthYear == 0 ? "Unknown" : dateOfBirthYear).append("\n");
+        stringBuilder.append("Death year: ").append(dateOfDeathYear == 0 ? "Unknown" : dateOfDeathYear).append("\n");
         stringBuilder.append("Books: [");
         for (int i = 0; i < books.size(); i++) {
             stringBuilder.append(books.get(i).getTitle());
