@@ -13,6 +13,7 @@ BookLens simplifies the process of managing a library database by providing an i
 - **List Registered Authors:** Users can view all authors registered in the database.
 - **List Alive Authors of Certain Year:** Users can list authors who were alive during a certain year.
 - **List Books with a Certain Language:** Users can list books in a certain language.
+- **List Most Popular Books:** Users can list books with the highest number of downloads.
 
 ## 🛠️ Technologies Used
 
