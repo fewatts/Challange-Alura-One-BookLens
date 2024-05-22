@@ -1,6 +1,7 @@
 package com.API.BookLens.main;
 
 import java.io.IOException;
+import java.util.Comparator;
 import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Scanner;
@@ -42,7 +43,8 @@ public class Main {
                         3- List registered authors
                         4- List alive authors of certain year
                         5- List books with a certain language
-                        6- Close application
+                        6- List most popular books
+                        7- Close application
                     -----------------------------------------
                     """);
 
@@ -62,7 +64,8 @@ public class Main {
                 case 3 -> listRegisteredAuthors();
                 case 4 -> listAliveAuthorsOfCertainYear();
                 case 5 -> listBooksWithACertainLanguage();
-                case 6 -> {
+                case 6 -> listMostPopularBooks();
+                case 7 -> {
                     System.out.println("Closing application...");
                     return;
                 }
@@ -78,9 +81,10 @@ public class Main {
      * processes the results, and saves the book information to the database if not
      * already present.
      */
-    private void searchBookByTitle() { 
+    private void searchBookByTitle() {
 
-        if (scan.hasNextLine()) scan.nextLine();
+        if (scan.hasNextLine())
+            scan.nextLine();
 
         System.out.println("Type the book name:");
         String bookName = scan.nextLine();
@@ -92,13 +96,14 @@ public class Main {
 
             if (processBookResults(bookDTO)) {
                 System.out.println("Book details processed and saved.");
-            }else{
+            } else {
                 System.out.println("-----------------------------------------");
                 System.out.println("No books found.");
             }
         } catch (Exception e) {
             handleException(e);
         }
+
     }
 
     /**
@@ -147,10 +152,10 @@ public class Main {
             if (bookRepository.findByTitle(book.getTitle()) != null) {
                 System.out.println("-----------------------------------------");
                 System.out.println("Book is already present in the database.");
-                return false;
-            } else if(book.getTitle() == null){
-                return false;
-            }else {
+                return found;
+            } else if (book.getTitle() == null) {
+                return found;
+            } else {
                 saveBookAndAuthor(book);
             }
             System.out.println(book.toString());
@@ -222,7 +227,6 @@ public class Main {
         if (authors.isEmpty()) {
             System.out.println("-----------------------------------------");
             System.out.println("Your database is empty");
-            return;
         }
         authors.forEach(a -> System.out.println(a.toString()));
     }
@@ -245,10 +249,10 @@ public class Main {
         if (aliveAuthors.isEmpty()) {
             System.out.println("-----------------------------------------");
             System.out.println("No living authors found for the year " + year);
-            return;
         } else {
             aliveAuthors.forEach(a -> System.out.println(a.toString()));
         }
+
     }
 
     /**
@@ -286,6 +290,7 @@ public class Main {
                 System.out.println("Invalid option.");
                 return;
             }
+
         }
 
         List<Book> books = bookRepository.findAll();
@@ -295,11 +300,16 @@ public class Main {
         if (booksWithCertainLanguage.isEmpty()) {
             System.out.println("-----------------------------------------");
             System.out.println("No books found in this language: " + language);
-            return;
         } else {
             booksWithCertainLanguage.forEach(a -> System.out.println(a.toString()));
         }
 
+    }
+
+    private void listMostPopularBooks() {
+        List<Book> books = bookRepository.findAll();
+        books.sort(Comparator.comparingLong(Book::getNumberOfDownloads).reversed());
+        books.forEach(System.out::println);
     }
 
 }
