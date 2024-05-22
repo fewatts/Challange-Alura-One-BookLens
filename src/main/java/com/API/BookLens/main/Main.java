@@ -22,6 +22,35 @@ public class Main {
 
     private Scanner scan = new Scanner(System.in);
 
+    private static final String MENU = """
+            -----------------------------------------
+                Choose your number option:
+                1- Search book by title
+                2- List registered books
+                3- List registered authors
+                4- List alive authors of certain year
+                5- List books with a certain language
+                6- List most popular books
+                7- Close application
+            -----------------------------------------
+            """;
+
+    private static final String LANGUAGE_MENU = """
+            -----------------------------------------
+                Choose the language:
+                1- En (English)
+                2- Pt (Portuguese)
+                3- Fr (French)
+                4- Es (Spanish)
+            -----------------------------------------
+            """;
+
+    /**
+     * Constructs the Main class with the specified author and book repositories.
+     *
+     * @param authorRepository the repository for author data
+     * @param bookRepository   the repository for book data
+     */
     public Main(AuthorRepository authorRepository, BookRepository bookRepository) {
         this.authorRepository = authorRepository;
         this.bookRepository = bookRepository;
@@ -31,32 +60,11 @@ public class Main {
      * Displays the main menu and handles user input to perform various actions.
      */
     public void menu() {
-
         while (true) {
-            int option = 0;
-
-            System.out.println("""
-                    -----------------------------------------
-                        Choose your number option:
-                        1- Search book by title
-                        2- List registered books
-                        3- List registered authors
-                        4- List alive authors of certain year
-                        5- List books with a certain language
-                        6- List most popular books
-                        7- Close application
-                    -----------------------------------------
-                    """);
-
-            try {
-                option = scan.nextInt();
-            } catch (NumberFormatException | InputMismatchException error) {
-                System.out.println("Only numbers are allowed in this menu!");
-                System.out.println(error);
-                System.out.println("-----------------------------------------");
-                scan.next();
+            System.out.println(MENU);
+            int option = getIntInput();
+            if (option == -1)
                 continue;
-            }
 
             switch (option) {
                 case 1 -> searchBookByTitle();
@@ -77,9 +85,9 @@ public class Main {
     }
 
     /**
-     * Searches for a book by its title, fetches data from an external API,
-     * processes the results, and saves the book information to the database if not
-     * already present.
+     * Prompts the user to enter a book title, searches for the book using an
+     * external API,
+     * and processes the results.
      */
     private void searchBookByTitle() {
 
@@ -88,20 +96,134 @@ public class Main {
 
         System.out.println("Type the book name:");
         String bookName = scan.nextLine();
+        if (bookName.isEmpty()) {
+            System.out.println("Book name cannot be empty.");
+            return;
+        }
         String bookInURL = formatBookNameForURL(bookName);
 
         try {
             String json = fetchBookDataFromAPI(bookInURL);
             BookDTO bookDTO = convertJsonToBookDTO(json);
-
             if (processBookResults(bookDTO)) {
                 System.out.println("Book details processed and saved.");
             } else {
-                System.out.println("-----------------------------------------");
                 System.out.println("No books found.");
             }
         } catch (Exception e) {
             handleException(e);
+        }
+
+    }
+
+    /**
+     * Lists all registered books and prints their information on the console.
+     */
+    private void listRegisteredBooks() {
+        List<Book> books = bookRepository.findAll();
+        if (books.isEmpty()) {
+            System.out.println("Your database is empty");
+        } else {
+            books.forEach(System.out::println);
+        }
+
+    }
+
+    /**
+     * Lists all registered authors and prints their information on the console.
+     */
+    private void listRegisteredAuthors() {
+        List<Author> authors = authorRepository.findAll();
+        if (authors.isEmpty()) {
+            System.out.println("Your database is empty");
+        } else {
+            authors.forEach(System.out::println);
+        }
+
+    }
+
+    /**
+     * Lists all authors who were alive during a certain year and prints their
+     * information on the console. Prompts the user to input the year.
+     */
+    private void listAliveAuthorsOfCertainYear() {
+        System.out.println("Type the year:");
+        int year = getIntInput();
+        if (year == -1)
+            return;
+
+        List<Author> aliveAuthors = authorRepository.findAll().stream()
+                .filter(author -> author.getDateOfBirthYear() <= year && author.getDateOfDeathYear() >= year)
+                .collect(Collectors.toList());
+
+        if (aliveAuthors.isEmpty()) {
+            System.out.println("No living authors found for the year " + year);
+        } else {
+            aliveAuthors.forEach(System.out::println);
+        }
+
+    }
+
+    /**
+     * Lists books with a certain language based on user input.
+     * The method prompts the user to choose a language from a predefined list
+     * and then filters the books to display only those in the chosen language.
+     * If no books are found for the chosen language, it prints a message indicating
+     * so.
+     */
+    private void listBooksWithACertainLanguage() {
+        System.out.println(LANGUAGE_MENU);
+        int languageOption = getIntInput();
+        if (languageOption == -1)
+            return;
+
+        String language;
+        switch (languageOption) {
+            case 1 -> language = "en";
+            case 2 -> language = "pt";
+            case 3 -> language = "fr";
+            case 4 -> language = "es";
+            default -> {
+                System.out.println("Invalid option.");
+                return;
+            }
+
+        }
+
+        List<Book> booksWithCertainLanguage = bookRepository.findAll().stream()
+                .filter(book -> book.getLanguage().equalsIgnoreCase(language))
+                .collect(Collectors.toList());
+
+        if (booksWithCertainLanguage.isEmpty()) {
+            System.out.println("No books found in this language: " + language);
+        } else {
+            booksWithCertainLanguage.forEach(System.out::println);
+        }
+
+    }
+
+    /**
+     * Lists the most popular books based on the number of downloads.
+     */
+    private void listMostPopularBooks() {
+        bookRepository.findAll().stream()
+                .sorted(Comparator.comparingLong(Book::getNumberOfDownloads).reversed())
+                .forEach(System.out::println);
+    }
+
+    /**
+     * Gets an integer input from the user. If the input is not a valid integer,
+     * it returns -1 and prompts the user to enter a valid number.
+     *
+     * @return the integer input from the user or -1 if the input is invalid
+     */
+    private int getIntInput() {
+        try {
+            return scan.nextInt();
+        } catch (InputMismatchException e) {
+            System.out.println("Only numbers are allowed!");
+            scan.next();
+            return -1;
         }
 
     }
@@ -139,30 +261,27 @@ public class Main {
 
     /**
      * Processes the book results from the BookDTO object. If a book is found and
-     * not already in the database,
-     * it saves the book and author information.
+     * not already in the database, it saves the book and author information.
      *
      * @param bookDTO the BookDTO object containing book results
      * @return true if a book was processed and found, false otherwise
      */
     private boolean processBookResults(BookDTO bookDTO) {
-        boolean found = false;
         for (var result : bookDTO.results()) {
             Book book = createBookFromResult(result);
             if (bookRepository.findByTitle(book.getTitle()) != null) {
-                System.out.println("-----------------------------------------");
                 System.out.println("Book is already present in the database.");
-                return found;
+                return false;
             } else if (book.getTitle() == null) {
-                return found;
+                return false;
             } else {
                 saveBookAndAuthor(book);
+                System.out.println(book);
+                return true;
             }
-            System.out.println(book.toString());
-            found = true;
-            break;
+
         }
-        return found;
+        return false;
     }
 
     /**
@@ -180,9 +299,9 @@ public class Main {
     }
 
     /**
-     * Saves the book and author information to the database. If the author already
-     * exists,
-     * it associates the book with the existing author.
+     * Saves the book and author information to the repositories. If the author
+     * already exists in the database, it associates the existing author with the
+     * book.
      *
      * @param book the Book object to be saved
      */
@@ -199,117 +318,11 @@ public class Main {
     /**
      * Handles exceptions by printing the error message and stack trace.
      *
-     * @param e the exception that occurred
+     * @param e the exception to be handled
      */
     private void handleException(Exception e) {
-        System.out.println("-----------------------------------------");
         System.out.println("An error occurred: " + e.getMessage());
         e.printStackTrace();
-    }
-
-    /**
-     * Lists all registered books and prints their information on the console.
-     */
-    private void listRegisteredBooks() {
-        List<Book> books = bookRepository.findAll();
-        if (books.isEmpty()) {
-            System.out.println("-----------------------------------------");
-            System.out.println("Your database is empty");
-        }
-        books.forEach(b -> System.out.println(b.toString()));
-    }
-
-    /**
-     * Lists all registered authors and prints their information on the console.
-     */
-    private void listRegisteredAuthors() {
-        List<Author> authors = authorRepository.findAll();
-        if (authors.isEmpty()) {
-            System.out.println("-----------------------------------------");
-            System.out.println("Your database is empty");
-        }
-        authors.forEach(a -> System.out.println(a.toString()));
-    }
-
-    /**
-     * Lists all authors who were alive during a certain year and prints their
-     * information on the console.
-     * Prompts the user to input the year.
-     */
-    private void listAliveAuthorsOfCertainYear() {
-        System.out.println("Type the year:");
-        int year = scan.nextInt();
-
-        List<Author> authors = authorRepository.findAll();
-
-        List<Author> aliveAuthors = authors.stream()
-                .filter(author -> author.getDateOfBirthYear() <= year && author.getDateOfDeathYear() >= year)
-                .collect(Collectors.toList());
-
-        if (aliveAuthors.isEmpty()) {
-            System.out.println("-----------------------------------------");
-            System.out.println("No living authors found for the year " + year);
-        } else {
-            aliveAuthors.forEach(a -> System.out.println(a.toString()));
-        }
-
-    }
-
-    /**
-     * Lists books with a certain language based on user input.
-     * The method prompts the user to choose a language from a predefined list
-     * and then filters the books to display only those in the chosen language.
-     * If no books are found for the chosen language, it prints a message indicating
-     * so.
-     */
-    private void listBooksWithACertainLanguage() {
-        int languageOption = 0;
-        System.out.println("""
-                -----------------------------------------
-                    Choose the language:
-                    1- En (English)
-                    2- Pt (Portuguese)
-                    3- Fr (French)
-                    4- Es (Spanish)
-                -----------------------------------------
-                    """);
-        try {
-            languageOption = scan.nextInt();
-        } catch (NumberFormatException | InputMismatchException error) {
-            System.out.println("Only numbers are allowed in this menu!");
-            System.out.println(error);
-            System.out.println("-----------------------------------------");
-        }
-        final String language;
-        switch (languageOption) {
-            case 1 -> language = "en";
-            case 2 -> language = "pt";
-            case 3 -> language = "fr";
-            case 4 -> language = "es";
-            default -> {
-                System.out.println("Invalid option.");
-                return;
-            }
-
-        }
-
-        List<Book> books = bookRepository.findAll();
-        List<Book> booksWithCertainLanguage = books.stream()
-                .filter(book -> book.getLanguage().equalsIgnoreCase(language))
-                .collect(Collectors.toList());
-        if (booksWithCertainLanguage.isEmpty()) {
-            System.out.println("-----------------------------------------");
-            System.out.println("No books found in this language: " + language);
-        } else {
-            booksWithCertainLanguage.forEach(a -> System.out.println(a.toString()));
-        }
-
-    }
-
-    private void listMostPopularBooks() {
-        List<Book> books = bookRepository.findAll();
-        books.sort(Comparator.comparingLong(Book::getNumberOfDownloads).reversed());
-        books.forEach(System.out::println);
     }
 
 }
